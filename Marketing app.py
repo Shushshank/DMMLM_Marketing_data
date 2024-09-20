@@ -1,45 +1,46 @@
 import streamlit as st
 import pandas as pd
 import pickle
-from sklearn.ensemble import RandomForestClassifier
 
 # Load the trained model
-filename = 'rf_model.pkl'
-rf_model = pickle.load(open(filename, 'rb'))
+model = pickle.load(open('rf_model.pkl', 'rb'))
 
-# Load the dataset (replace with your actual dataset path)
-df = pd.read_csv('your_file.csv')  # Replace 'your_file.csv' with the actual file name
+# Create a title for your app
+st.title("Insurance Response Prediction App")
 
-# Create the Streamlit app
-st.title("Random Forest Model Prediction App")
-
-# Display the dataset (optional)
-st.subheader("Dataset Preview")
-st.dataframe(df.head())
-
-# Create input fields for user to enter data
-st.subheader("Enter Input Features:")
-
-# Get the feature names from your dataset
-feature_names = df.columns[:-1]  # Assuming the last column is the target variable
-
-input_features = {}
-for feature in feature_names:
-  input_features[feature] = st.number_input(f"Enter {feature}:")
+# Create input fields for the features
+st.header("Enter Customer Information:")
+age = st.number_input("Age", min_value=18, max_value=100, value=30)
+driving_license = st.selectbox("Driving License", [0, 1])
+region_code = st.number_input("Region Code", min_value=0, max_value=100, value=10)
+previously_insured = st.selectbox("Previously Insured", [0, 1])
+vehicle_age = st.selectbox("Vehicle Age", ["< 1 Year", "1-2 Year", "> 2 Years"])
+vehicle_damage = st.selectbox("Vehicle Damage", ["Yes", "No"])
+annual_premium = st.number_input("Annual Premium", min_value=0, value=1000)
+policy_sales_channel = st.number_input("Policy Sales Channel", min_value=1, value=10)
+vintage = st.number_input("Vintage", min_value=0, value=100)
 
 # Create a button to make predictions
-if st.button("Predict"):
-  # Create a DataFrame from the user input
-  input_df = pd.DataFrame([input_features])
+if st.button("Predict Response"):
+    # Create a DataFrame with the input values
+    input_data = pd.DataFrame({
+        'Age': [age],
+        'Driving_License': [driving_license],
+        'Region_Code': [region_code],
+        'Previously_Insured': [previously_insured],
+        'Vehicle_Age': [vehicle_age],
+        'Vehicle_Damage': [vehicle_damage],
+        'Annual_Premium': [annual_premium],
+        'Policy_Sales_Channel': [policy_sales_channel],
+        'Vintage': [vintage]
+    })
 
-  # Make prediction using the loaded model
-  prediction = rf_model.predict(input_df)[0]
+    # Make a prediction using the loaded model
+    prediction = model.predict(input_data)[0]
 
-  # Display the prediction
-  st.subheader("Prediction:")
-  st.write(f"The predicted response is: {prediction}")
+    # Display the prediction
+    if prediction == 1:
+        st.success("The customer is likely to respond to the insurance offer.")
+    else:
+        st.warning("The customer is likely not to respond to the insurance offer.")
 
-# You can add more features to the app, such as:
-# - Displaying model performance metrics
-# - Allowing users to upload their own data
-# - Visualizing the data using charts and graphs
